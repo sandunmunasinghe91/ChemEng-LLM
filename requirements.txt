@@ -1,0 +1,22 @@
+# Core Libaries
+pandas
+numpy
+torch
+tiktoken
+tqdm
+
+# Data Collection and Processing 
+arxiv
+wikipedia
+Wikipedia-API
+requests
+beautifulsoup4
+pymupdf
+docling
+datasets
+jason
+
+#Environment Variable
+python-dotenv
+
+ipykernel 
