@@ -11,8 +11,6 @@ Features:
 - Recreates split folders on every run (no stale files)
 - Saves a manifest for full reproducibility
 
-Run from project root:
-    python -m preprocessing.split_corpus
 """
 
 import json
