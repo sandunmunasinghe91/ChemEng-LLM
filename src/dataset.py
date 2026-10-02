@@ -1,10 +1,3 @@
-"""
-dataset.py
-
-PyTorch Dataset and DataLoader utilities for
-tokenized language model training data.
-"""
-
 import logging
 from pathlib import Path
 import numpy as np
