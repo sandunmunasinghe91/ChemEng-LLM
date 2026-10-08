@@ -130,16 +130,12 @@ def split_source(source_name: str, source_dir: Path) -> dict:
 
     # ── validate source ───────────────────────────────────────────
     if not source_dir.is_dir():
-        raise NotADirectoryError(
-            f"[{source_name}] Source directory not found: {source_dir}"
-        )
+        raise NotADirectoryError(f"[{source_name}] Source directory not found: {source_dir}")
 
     files = sorted(source_dir.glob("*.txt"))
 
     if not files:
-        raise FileNotFoundError(
-            f"[{source_name}] No .txt files found in: {source_dir}"
-        )
+        raise FileNotFoundError(f"[{source_name}] No .txt files found in: {source_dir}")
 
     logger.info("%s: found %d files in %s", source_name, len(files), source_dir)
 
@@ -148,10 +144,8 @@ def split_source(source_name: str, source_dir: Path) -> dict:
 
     for i, file_path in enumerate(files, start=1):
         word_count = count_words(file_path)
-
         if word_count > 0:
             file_word_counts[file_path] = word_count
-
         if i % 200 == 0:
             logger.info("%s: counted %d / %d files", source_name, i, len(files))
 
@@ -159,25 +153,14 @@ def split_source(source_name: str, source_dir: Path) -> dict:
     skipped_files = len(files) - len(usable_files)
 
     if skipped_files > 0:
-        logger.warning(
-            "%s: skipped %d empty or unreadable files",
-            source_name,
-            skipped_files,
-        )
+        logger.warning( "%s: skipped %d empty or unreadable files",source_name,skipped_files)
 
     total_words = sum(file_word_counts.values())
 
     if total_words == 0:
-        raise ValueError(
-            f"[{source_name}] No usable text found in: {source_dir}"
-        )
+        raise ValueError(f"[{source_name}] No usable text found in: {source_dir}")
 
-    logger.info(
-        "%s: %d usable files | %s words",
-        source_name,
-        len(usable_files),
-        f"{total_words:,}",
-    )
+    logger.info("%s: %d usable files | %s words", source_name, len(usable_files), f"{total_words:,}")
 
     # ── reproducible shuffle ──────────────────────────────────────
     # Derive a unique seed per source so each source shuffles
@@ -259,13 +242,8 @@ def split_source(source_name: str, source_dir: Path) -> dict:
 # =====================================================
 
 def main() -> None:
-
-    logger.info(
-        "Starting corpus split | sources: %s | val_ratio: %.2f | seed: %d",
-        list(SOURCE_DIRS.keys()),
-        VAL_RATIO,
-        SEED,
-    )
+    logger.info("Starting corpus split | sources: %s | val_ratio: %.2f | seed: %d",
+                list(SOURCE_DIRS.keys()),VAL_RATIO,SEED)
 
     # wipe old split directories before starting
     prepare_split_dirs()

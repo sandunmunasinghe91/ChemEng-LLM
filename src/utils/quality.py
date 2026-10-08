@@ -102,54 +102,20 @@ GARBLED_PATTERN = re.compile(
 # =====================================================
 
 STRONG_DOMAIN_KEYWORDS = [
-    "chemical engineering",
-    "process engineering",
-    "chemical reactor",
-    "reaction engineering",
-    "chemical reaction kinetics",
-    "process control",
-    "mass transfer",
-    "heat transfer",
-    "heat exchanger",
-    "distillation",
-    "vapor liquid equilibrium",
-    "vapour liquid equilibrium",
-    "catalytic reactor",
-    "process simulation",
-    "process optimization",
-    "transport phenomena",
-    "fluidized bed",
-    "membrane separation",
-    "separation process",
-    "film boiling",
-    "phase equilibrium",
-    "process intensification",
-    "process safety",
-    "chemical process",
-    "reactor design",
-    "reactor modeling",
-    "reaction rate",
+    "chemical engineering", "process engineering", "chemical reactor", "reaction engineering",
+    "chemical reaction kinetics", "process control", "mass transfer", "heat transfer",
+    "heat exchanger", "distillation", "vapor liquid equilibrium", "vapour liquid equilibrium",
+    "catalytic reactor", "process simulation", "process optimization", "transport phenomena",
+    "fluidized bed", "membrane separation", "separation process", "film boiling",
+    "phase equilibrium", "process intensification", "process safety", "chemical process",
+    "reactor design", "reactor modeling", "reaction rate",
 ]
 
 
 WEAK_DOMAIN_KEYWORDS = [
-    "reaction",
-    "reactor",
-    "temperature",
-    "pressure",
-    "concentration",
-    "equilibrium",
-    "thermodynamics",
-    "kinetics",
-    "fluid",
-    "diffusion",
-    "simulation",
-    "optimization",
-    "control",
-    "prediction",
-    "model",
-    "catalyst",
-    "separation",
+    "reaction", "reactor", "temperature", "pressure", "concentration", "equilibrium",
+    "thermodynamics", "kinetics", "fluid", "diffusion", "simulation", "optimization",
+    "control", "prediction", "model", "catalyst", "separation",
 ]
 
 
@@ -157,64 +123,39 @@ WEAK_DOMAIN_KEYWORDS = [
 # 4. Individual quality checks
 # =====================================================
 
-def check_minimum_length(
-    text: str,
-    min_words: int = MIN_ACCEPT_WORDS,
-) -> tuple[bool, str]:
+def check_minimum_length(text: str,min_words: int = MIN_ACCEPT_WORDS) -> tuple[bool, str]:
     """
     Check whether the document contains enough words.
     """
-
     word_count = len(text.split())
 
     if word_count < min_words:
-        return (
-            False,
-            f"Short document: {word_count} words "
-            f"(minimum {min_words})",
-        )
-
+        return False, f"Short document: {word_count} words, minimum {min_words})"
     return True, f"Length OK: {word_count} words"
 
 
-def check_latex_residue(
-    text: str,
-    max_artifacts_per_1000: float = 2.0,
-) -> tuple[bool, str]:
+def check_latex_residue(text: str,max_artifacts_per_1000: float = 2.0) -> tuple[bool, str]:
     """
     Detect unwanted LaTeX formatting commands.
-
     Mathematical notation is intentionally preserved.
     """
 
     formatting_matches = FORMATTING_PATTERN.findall(text)
 
-    environment_matches = (
-        UNWANTED_ENVIRONMENT_PATTERN.findall(text)
-    )
+    environment_matches = UNWANTED_ENVIRONMENT_PATTERN.findall(text)
 
-    artifact_count = (
-        len(formatting_matches)
-        + len(environment_matches)
-    )
-
+    artifact_count = len(formatting_matches) + len(environment_matches)
+    
     word_count = max(len(text.split()), 1)
 
-    artifact_rate = (
-        artifact_count / word_count
-    ) * 1000
+    artifact_rate = (artifact_count / word_count) * 1000
 
     # Flag unwanted environments even if their
     # overall frequency is low.
 
-    serious_environment_found = bool(
-        environment_matches
-    )
+    serious_environment_found = bool(environment_matches)
 
-    passed = (
-        artifact_rate <= max_artifacts_per_1000
-        and not serious_environment_found
-    )
+    passed = artifact_rate <= max_artifacts_per_1000 and not serious_environment_found
 
     message = (
         f"{artifact_count} formatting artifacts; "
@@ -227,46 +168,24 @@ def check_latex_residue(
     return passed, message
 
 
-def check_broken_references(
-    text: str,
-    max_per_1000_words: float = 2.0,
-) -> tuple[bool, str]:
+def check_broken_references(text: str, max_per_1000_words: float = 2.0) -> tuple[bool, str]:
 
     broken = BROKEN_REFERENCE_PATTERN.findall(text)
-
-    unresolved = (
-        UNRESOLVED_REFERENCE_PATTERN.findall(text)
-    )
+    unresolved = UNRESOLVED_REFERENCE_PATTERN.findall(text)
 
     total = len(broken) + len(unresolved)
+    word_count = max(len(text.split()), 1)
 
-    word_count = max(
-        len(text.split()),
-        1,
-    )
-
-    rate = (
-        total / word_count
-    ) * 1000
+    rate = (total / word_count) * 1000
 
     if rate > max_per_1000_words:
-        return (
-            False,
-            f"{total} reference problems "
-            f"({rate:.2f} per 1000 words)",
-        )
+        return False, f"{total} reference problems, ({rate:.2f} per 1000 words)"
 
-    return (
-        True,
-        f"Reference problems OK: "
-        f"{total} ({rate:.2f} per 1000 words)",
-    )
+    return True, f"Reference problems OK: {total} ({rate:.2f} per 1000 words)"
 
 
-def check_prose_ratio(
-    text: str,
-    min_ratio: float = MIN_ALPHA_RATIO,
-) -> tuple[bool, str]:
+    
+def check_prose_ratio(text: str, min_ratio: float = MIN_ALPHA_RATIO) -> tuple[bool, str]:
     """
     Estimate the proportion of alphabetic characters.
 
@@ -277,75 +196,37 @@ def check_prose_ratio(
     if not text:
         return False, "Empty text"
 
-    alpha_chars = sum(
-        char.isalpha()
-        for char in text
-    )
-
+    alpha_chars = sum(char.isalpha() for char in text)
     ratio = alpha_chars / len(text)
 
     if ratio < min_ratio:
-        return (
-            False,
-            f"Low alphabetic-character ratio: "
-            f"{ratio:.1%}",
-        )
-
-    return (
-        True,
-        f"Alphabetic-character ratio OK: "
-        f"{ratio:.1%}",
-    )
+        return False, f"Low alphabetic-character ratio: {ratio:.1%}"
+        
+    return True, f"Alphabetic-character ratio OK: {ratio:.1%}"
 
 
-def check_domain_relevance(
-    text: str,
-) -> tuple[bool, str]:
+
+def check_domain_relevance(text: str) -> tuple[bool, str]:
     """
     Estimate chemical engineering relevance.
 
     A failed result requires review rather than
     automatic rejection.
     """
-
     text_lower = text.lower()
 
-    strong_hits = [
-        keyword
-        for keyword in STRONG_DOMAIN_KEYWORDS
-        if re.search(
-            rf"\b{re.escape(keyword)}\b",
-            text_lower,
-        )
-    ]
+    strong_hits = [ keyword for keyword in STRONG_DOMAIN_KEYWORDS if re.search(rf"\b{re.escape(keyword)}\b",text_lower)]
 
-    weak_hits = [
-        keyword
-        for keyword in WEAK_DOMAIN_KEYWORDS
-        if re.search(
-            rf"\b{re.escape(keyword)}\b",
-            text_lower,
-        )
-    ]
+    weak_hits = [keyword for keyword in WEAK_DOMAIN_KEYWORDS if re.search(rf"\b{re.escape(keyword)}\b",text_lower)]
 
     if strong_hits:
-        return (
-            True,
-            "Potential domain match: "
-            + ", ".join(strong_hits[:5]),
-        )
+        return (True,"Potential domain match: "+ ", ".join(strong_hits[:5]))
 
-    return (
-        False,
-        "Domain relevance uncertain; weak terms: "
-        + (", ".join(weak_hits[:5]) or "none"),
-    )
+    return False, "Domain relevance uncertain; weak terms: " + (", ".join(weak_hits[:5]) or "none")
 
 
-def check_garbled_text(
-    text: str,
-    max_ratio: float = MAX_GARBLED_RATIO,
-) -> tuple[bool, str]:
+
+def check_garbled_text(text: str, max_ratio: float = MAX_GARBLED_RATIO) -> tuple[bool, str]:
     """
     Detect control characters, replacement characters,
     and escaped hexadecimal artifacts.
@@ -359,23 +240,12 @@ def check_garbled_text(
     ratio = len(matches) / len(text)
 
     if ratio > max_ratio:
-        return (
-            False,
-            f"Excessive garbled text: "
-            f"{len(matches)} artifacts ({ratio:.2%})",
-        )
+        return False, f"Excessive garbled text: {len(matches)} artifacts ({ratio:.2%})"
 
-    return (
-        True,
-        f"Garbled text check OK: "
-        f"{len(matches)} artifacts ({ratio:.2%})",
-    )
+    return True, f"Garbled text check OK: {len(matches)} artifacts ({ratio:.2%})"
 
 
-def check_repetition(
-    text: str,
-    max_ratio: float = MAX_REPETITION_RATIO,
-) -> tuple[bool, str]:
+def check_repetition(text: str,max_ratio: float = MAX_REPETITION_RATIO) -> tuple[bool, str]:
     """
     Detect excessive repetition in substantial text lines.
 
@@ -383,49 +253,26 @@ def check_repetition(
     LaTeX commands to reduce false positives.
     """
 
-    lines = [
-        line.strip()
-        for line in text.splitlines()
-        if len(line.strip()) >= 80
-        and not line.strip().startswith("\\")
-    ]
+    lines = [line.strip() for line in text.splitlines() if len(line.strip()) >= 80 and not line.strip().startswith("\\")]
 
     if len(lines) < MIN_LINES_FOR_REPETITION:
-        return (
-            True,
-            "Insufficient substantial lines "
-            "for repetition check",
-        )
+        return True, "Insufficient substantial lines for repetition check"
 
     unique_lines = set(lines)
 
-    repeated_ratio = (
-        1 - len(unique_lines) / len(lines)
-    )
+    repeated_ratio = 1 - len(unique_lines) / len(lines)
 
     if repeated_ratio > max_ratio:
-        return (
-            False,
-            f"Excessive repeated lines: "
-            f"{repeated_ratio:.1%}",
-        )
+        return False, f"Excessive repeated lines: {repeated_ratio:.1%}"
 
-    return (
-        True,
-        f"Repetition check OK: "
-        f"{repeated_ratio:.1%}",
-    )
+    return True, f"Repetition check OK: {repeated_ratio:.1%}"
 
 
 # =====================================================
 # 5. Evaluate one paper
 # =====================================================
 
-def check_paper_quality(
-    text: str,
-    paper_id: str = "",
-    verbose: bool = False,
-) -> tuple[str, dict]:
+def check_paper_quality(text: str, paper_id: str = "", verbose: bool = False) -> tuple[str, dict]:
     """
     Run all quality checks on one cleaned paper.
 
@@ -464,11 +311,7 @@ def check_paper_quality(
         checks["repetition"][0],
     ]
 
-    if (
-        not text.strip()
-        or word_count < MIN_REJECT_WORDS
-        or not checks["garbled_text"][0]
-    ):
+    if not text.strip() or word_count < MIN_REJECT_WORDS or not checks["garbled_text"][0]:
         status = "rejected"
         
     elif not all(quality_checks):
@@ -498,22 +341,9 @@ def check_paper_quality(
     # ---------------------------------------------
 
     if verbose:
-
-        logger.info(
-            "%s | %s",
-            status.upper(),
-            paper_id,
-        )
-
+        logger.info("%s | %s", status.upper(), paper_id)
         for name, (passed, reason) in checks.items():
-
             label = "PASS" if passed else "CHECK"
-
-            logger.info(
-                "  %s | %s | %s",
-                label,
-                name,
-                reason,
-            )
+            logger.info("  %s | %s | %s", label, name, reason)
 
     return status, report
